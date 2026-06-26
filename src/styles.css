@@ -294,3 +294,818 @@ body {
   border: 2px solid var(--tl-color-text);
   border-radius: 4px;
 }
+
+/* ---- Settings panel ---- */
+
+.cowart-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(15 18 24 / 38%);
+  backdrop-filter: blur(2px);
+}
+
+.cowart-settings-panel {
+  width: min(480px, calc(100vw - 32px));
+  max-height: min(680px, calc(100vh - 48px));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 22px;
+  background: #fffdf7;
+  color: #1f2430;
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgb(15 18 24 / 28%);
+}
+
+.cowart-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cowart-settings-header h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.cowart-settings-close {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #5b6472;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cowart-settings-close:hover {
+  background: rgb(15 18 24 / 6%);
+}
+
+.cowart-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cowart-section-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #ece7d6;
+}
+
+.cowart-section-title strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2430;
+}
+
+.cowart-section-title span {
+  font-size: 11.5px;
+  color: #8a8472;
+  line-height: 1.4;
+}
+
+.cowart-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cowart-settings-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5b6472;
+}
+
+.cowart-settings-panel input,
+.cowart-settings-panel select,
+.cowart-settings-panel textarea {
+  padding: 8px 10px;
+  border: 1px solid #d8d3c4;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2430;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.cowart-settings-panel input:focus,
+.cowart-settings-panel select:focus,
+.cowart-settings-panel textarea:focus {
+  outline: none;
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 3px rgb(47 128 237 / 16%);
+}
+
+.cowart-settings-panel textarea {
+  resize: vertical;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+.cowart-settings-hint {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.cowart-cors-direct {
+  background: #e7f6ec;
+  border: 1px solid #9bd9ac;
+  color: #1f6b38;
+}
+
+.cowart-cors-proxy {
+  background: #fff3d6;
+  border: 1px solid #e6c65c;
+  color: #8a6300;
+}
+
+.cowart-settings-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: #fdecec;
+  border: 1px solid #f1b8b8;
+  border-radius: 8px;
+}
+
+.cowart-settings-warning strong {
+  font-size: 12px;
+  color: #a52a2a;
+}
+
+.cowart-settings-warning span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #6b3232;
+}
+
+.cowart-settings-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cowart-settings-save {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2f80ed;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cowart-settings-save:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.cowart-settings-save:not(:disabled):hover {
+  background: #1c6fd9;
+}
+
+.cowart-settings-saved {
+  font-size: 12px;
+  color: #1f6b38;
+}
+
+/* ---- layered provider/model management ---- */
+
+.cowart-settings-panel {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(80vh, 760px);
+}
+
+.cowart-domain {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid #ece7d6;
+}
+
+.cowart-domain:first-of-type {
+  border-top: none;
+}
+
+.cowart-active-row {
+  display: flex;
+  gap: 10px;
+}
+
+.cowart-active-row .cowart-settings-field {
+  flex: 1;
+}
+
+.cowart-provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cowart-provider-card {
+  border: 1px solid #e4dfcf;
+  border-radius: 10px;
+  background: #fffefb;
+  overflow: hidden;
+}
+
+.cowart-provider-card-active {
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 1px #2f80ed;
+}
+
+.cowart-provider-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cowart-default-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #2f80ed;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.cowart-set-default-button {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: 1px solid #2f80ed;
+  border-radius: 8px;
+  background: #fff;
+  color: #2f80ed;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cowart-set-default-button:hover {
+  background: #f3f8ff;
+}
+
+.cowart-provider-card-adding {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f7f5ef;
+}
+
+.cowart-provider-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cowart-provider-card-head:hover {
+  background: rgb(15 18 24 / 3%);
+}
+
+.cowart-provider-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cowart-provider-card-title em {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11.5px;
+  color: #8a8472;
+}
+
+.cowart-provider-card-models {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: #5b6472;
+}
+
+.cowart-provider-card-toggle {
+  color: #8a8472;
+  font-size: 13px;
+}
+
+.cowart-provider-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.cowart-model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #f7f5ef;
+  border-radius: 8px;
+}
+
+.cowart-model-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.cowart-model-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #d8d3c4;
+  border-radius: 6px;
+  font-size: 12.5px;
+  background: #fff;
+}
+
+.cowart-model-row input:first-child {
+  flex: 0 0 32%;
+}
+
+.cowart-model-row input:focus {
+  outline: none;
+  border-color: #2f80ed;
+}
+
+.cowart-provider-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cowart-add-button,
+.cowart-add-model-button {
+  padding: 8px 12px;
+  border: 1px dashed #b9b3a0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5b6472;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cowart-add-button:hover,
+.cowart-add-model-button:hover {
+  border-color: #2f80ed;
+  color: #2f80ed;
+  background: #e7f0fd;
+}
+
+.cowart-add-model-button {
+  align-self: flex-start;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.cowart-ghost-button {
+  padding: 9px 14px;
+  border: 1px solid #d8d3c4;
+  border-radius: 8px;
+  background: transparent;
+  color: #5b6472;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cowart-ghost-button:hover {
+  background: rgb(15 18 24 / 4%);
+}
+
+.cowart-danger-button {
+  margin-left: auto;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #a52a2a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cowart-danger-button:hover {
+  background: #fdecec;
+}
+
+.cowart-icon-button {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d8d3c4;
+  border-radius: 6px;
+  background: #fff;
+  color: #5b6472;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cowart-icon-button:hover {
+  border-color: #2f80ed;
+  color: #2f80ed;
+}
+
+.cowart-icon-danger:hover {
+  border-color: #a52a2a;
+  color: #a52a2a;
+}
+
+/* ---- AI panel launcher ---- */
+
+.cowart-ai-launcher {
+  position: fixed;
+  z-index: 900;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cowart-ai-launcher button {
+  height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 9px;
+  background: #1f2430;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgb(15 18 24 / 22%);
+}
+
+.cowart-ai-launcher button:hover {
+  background: #2b3140;
+}
+
+.cowart-ai-launcher .cowart-ai-launcher-settings {
+  background: #fffdf7;
+  color: #1f2430;
+  border: 1px solid #d8d3c4;
+}
+
+.cowart-ai-launcher .cowart-ai-launcher-settings:hover {
+  background: #f3efe3;
+  color: #1f2430;
+  border-color: #c8c2b0;
+}
+
+/* ---- AI panel ---- */
+
+.cowart-ai-panel {
+  position: fixed;
+  z-index: 1000;
+  top: 16px;
+  right: 16px;
+  bottom: 64px;
+  width: min(360px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  background: #fffdf7;
+  border: 1px solid #e4dfcf;
+  border-radius: 12px;
+  box-shadow: 0 14px 40px rgb(15 18 24 / 18%);
+  overflow: hidden;
+}
+
+.cowart-ai-panel-positioned {
+  right: auto;
+  bottom: auto;
+  height: min(640px, calc(100vh - 32px));
+}
+
+.cowart-ai-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ece7d6;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.cowart-ai-panel-header:active {
+  cursor: grabbing;
+}
+
+.cowart-ai-panel-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cowart-ai-panel-close {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #5b6472;
+  font-size: 13px;
+  cursor: pointer;
+  touch-action: auto;
+}
+
+.cowart-ai-panel-close:hover {
+  background: rgb(15 18 24 / 6%);
+}
+
+.cowart-ai-panel-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cowart-ai-panel-empty {
+  color: #5b6472;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.cowart-ai-panel-empty ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.cowart-ai-panel-empty li {
+  margin-bottom: 4px;
+}
+
+.cowart-ai-message {
+  padding: 8px 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cowart-ai-message-user {
+  align-self: flex-end;
+  max-width: 85%;
+  background: #2f80ed;
+  color: #fff;
+}
+
+.cowart-ai-message-assistant {
+  align-self: flex-start;
+  max-width: 92%;
+  background: #f0ece0;
+  color: #1f2430;
+}
+
+.cowart-ai-message-pending {
+  color: #5b6472;
+  font-style: italic;
+}
+
+.cowart-ai-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cowart-ai-turn-active .cowart-step-timeline {
+  border-color: #b9d4f7;
+  background: #f7fbff;
+}
+
+.cowart-step-timeline {
+  align-self: stretch;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #e4dfcf;
+  background: #faf8f3;
+}
+
+.cowart-step-timeline-toggle,
+.cowart-step-timeline-collapsed {
+  display: block;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #5b6472;
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cowart-step-timeline-collapsed {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e4dfcf;
+  background: #faf8f3;
+  color: #3d4a5c;
+}
+
+.cowart-step-timeline-collapsed:hover,
+.cowart-step-timeline-toggle:hover {
+  color: #2f80ed;
+}
+
+.cowart-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cowart-step-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding-left: 2px;
+  border-left: 2px solid transparent;
+}
+
+.cowart-step-row-running {
+  border-left-color: #2f80ed;
+}
+
+.cowart-step-row-done {
+  border-left-color: #3a9d5d;
+}
+
+.cowart-step-row-error {
+  border-left-color: #d14343;
+}
+
+.cowart-step-icon {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.cowart-step-icon-running {
+  border: 2px solid #b9d4f7;
+  border-top-color: #2f80ed;
+  border-radius: 50%;
+  animation: cowart-step-spin 0.8s linear infinite;
+}
+
+.cowart-step-icon-done {
+  color: #3a9d5d;
+}
+
+.cowart-step-icon-error {
+  color: #d14343;
+}
+
+.cowart-step-icon-pending {
+  color: #8a8472;
+}
+
+@keyframes cowart-step-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cowart-step-row-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.cowart-step-row-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cowart-step-row-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2430;
+}
+
+.cowart-step-row-duration {
+  font-size: 10.5px;
+  color: #8a8472;
+  font-variant-numeric: tabular-nums;
+}
+
+.cowart-step-row-detail {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #5b6472;
+  word-break: break-word;
+}
+
+.cowart-ai-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cowart-ai-step-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #e7f0fd;
+  border: 1px solid #b9d4f7;
+  color: #1c5fbf;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cowart-ai-error {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fdecec;
+  border: 1px solid #f1b8b8;
+  color: #a52a2a;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cowart-ai-panel-input {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #ece7d6;
+}
+
+.cowart-ai-panel-input input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #d8d3c4;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+
+.cowart-ai-panel-input input:focus {
+  outline: none;
+  border-color: #2f80ed;
+  box-shadow: 0 0 0 3px rgb(47 128 237 / 16%);
+}
+
+.cowart-ai-panel-input button {
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: #1f2430;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cowart-ai-panel-input button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cowart-ai-panel-input button:not(:disabled):hover {
+  background: #2b3140;
+}
+
+

@@ -44,18 +44,25 @@ import {
 } from 'tldraw'
 import { AllSelection } from '@tiptap/pm/state'
 import 'tldraw/tldraw.css'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import annotationToolIconRaw from './assets/tool-comment.svg?raw'
 import {
   describeSkippedRecord,
   isCanvasSnapshot,
   sanitizeCanvasSnapshotForTldraw
 } from './canvasSnapshot.js'
+import { seedDemoCanvas } from './lib/demoCanvas.js'
+import {
+  loadCanvasSnapshot,
+  saveCanvasSnapshot,
+  writeSelection,
+  readViewState,
+  writeViewState,
+  subscribeCanvasChanges
+} from './lib/storage.js'
+import SettingsPanel from './ui/SettingsPanel.jsx'
+import AIPanel from './ui/AIPanel.jsx'
 
-const CANVAS_ENDPOINT = '/api/canvas'
-const CANVAS_EVENTS_ENDPOINT = '/api/canvas-events'
-const SELECTION_ENDPOINT = '/api/selection'
-const VIEW_STATE_ENDPOINT = '/api/view-state'
 const SELECTION_STATE_ELEMENT_ID = 'cowart-selection-state'
 const AI_IMAGE_TOOL_ID = 'ai-image'
 const AI_IMAGE_HOLDER_LABEL = 'AI 图片'
@@ -989,30 +996,26 @@ export default function App() {
   const [viewState, setViewState] = useState()
   const [loadError, setLoadError] = useState(null)
   const [skippedRecords, setSkippedRecords] = useState([])
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
+  const editorRef = useRef(null)
+  const needsDemoSeedRef = useRef(false)
+  const getEditor = useCallback(() => editorRef.current, [])
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function loadCanvas() {
       try {
-        const [canvasResponse, viewStateResponse] = await Promise.all([
-          fetch(CANVAS_ENDPOINT, { signal: controller.signal }),
-          fetch(VIEW_STATE_ENDPOINT, { signal: controller.signal })
+        const [canvasResult, viewStateResult] = await Promise.all([
+          loadCanvasSnapshot(),
+          readViewState()
         ])
-        if (!canvasResponse.ok) {
-          throw new Error(`Failed to load canvas: ${canvasResponse.status} - ${canvasResponse.statusText}`)
-        }
-        if (!viewStateResponse.ok) {
-          throw new Error(`Failed to load canvas view state: ${viewStateResponse.status} - ${viewStateResponse.statusText}`)
-        }
-        const [canvasData, viewStateData] = await Promise.all([
-          canvasResponse.json(),
-          viewStateResponse.json()
-        ])
-        const sanitized = sanitizeCanvasSnapshotForTldraw(canvasData.snapshot)
+        needsDemoSeedRef.current = canvasResult.storage === 'empty'
+        const sanitized = sanitizeCanvasSnapshotForTldraw(canvasResult.snapshot)
         setSnapshot(sanitized.snapshot)
         setSkippedRecords(sanitized.skippedRecords)
-        setViewState(viewStateData.viewState ?? null)
+        setViewState(viewStateResult.viewState ?? null)
       } catch (error) {
         if (error.name === 'AbortError') return
         setLoadError(error)
@@ -1027,6 +1030,7 @@ export default function App() {
   }, [])
 
   const handleMount = useCallback((editor) => {
+    editorRef.current = editor
     window.__cowartEditor = editor
     window.__cowartSelection = () => getCowartSelection(editor)
     window.__cowartViewState = () => getCowartViewState(editor)
@@ -1036,10 +1040,6 @@ export default function App() {
     let lastSyncedViewState = ''
     let isViewStateSaving = false
     let hasPendingViewState = false
-
-    editor.timers.requestAnimationFrame(() => {
-      restoreCowartViewState(editor, viewState)
-    })
 
     async function syncSelectionState() {
       const selectionSnapshot = getCowartSelectionSnapshot(editor)
@@ -1056,17 +1056,10 @@ export default function App() {
 
       isSelectionStateSaving = true
       try {
-        const response = await fetch(SELECTION_ENDPOINT, {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            ...selectionSnapshot,
-            updatedAt: new Date().toISOString()
-          })
+        await writeSelection({
+          ...selectionSnapshot,
+          updatedAt: new Date().toISOString()
         })
-        if (!response.ok) {
-          throw new Error(`Failed to save selection: ${response.status}`)
-        }
       } catch (error) {
         console.error(error)
       } finally {
@@ -1098,14 +1091,7 @@ export default function App() {
 
       isViewStateSaving = true
       try {
-        const response = await fetch(VIEW_STATE_ENDPOINT, {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json' },
-          body: nextViewState
-        })
-        if (!response.ok) {
-          throw new Error(`Failed to save view state: ${response.status}`)
-        }
+        await writeViewState(viewStateSnapshot)
       } catch (error) {
         console.error(error)
       } finally {
@@ -1137,14 +1123,9 @@ export default function App() {
 
       isSaving = true
       try {
-        const body = JSON.stringify(editor.store.getStoreSnapshot())
-        const response = await fetch(CANVAS_ENDPOINT, {
-          method: 'PUT',
-          headers: { 'content-type': 'application/json' },
-          body
-        })
-        if (!response.ok) {
-          throw new Error(`Failed to save canvas: ${response.status}`)
+        const result = await saveCanvasSnapshot(editor.store.getStoreSnapshot())
+        if (result.storage === 'invalid') {
+          setSkippedRecords(result.skippedRecords)
         }
         hasUnsavedChanges = false
       } catch (error) {
@@ -1164,6 +1145,23 @@ export default function App() {
       saveTimer = window.setTimeout(saveCanvas, 500)
     }
 
+    editor.timers.requestAnimationFrame(() => {
+      if (needsDemoSeedRef.current) {
+        needsDemoSeedRef.current = false
+        void seedDemoCanvas(editor)
+          .then(() => {
+            scheduleSave()
+            editor.timers.setTimeout(syncViewState, 150)
+          })
+          .catch((error) => {
+            console.error('Cowart demo canvas seed failed:', error)
+          })
+        return
+      }
+
+      restoreCowartViewState(editor, viewState)
+    })
+
     async function loadRemoteCanvasSnapshot() {
       remoteLoadController?.abort()
       const controller = new AbortController()
@@ -1173,17 +1171,12 @@ export default function App() {
       const preFetchStore = preserveLocalChanges ? null : editor.store.getStoreSnapshot().store
 
       try {
-        const response = await fetch(CANVAS_ENDPOINT, { signal: controller.signal })
-        if (!response.ok) {
-          throw new Error(`Failed to refresh canvas: ${response.status}`)
-        }
-
-        const canvasData = await response.json()
+        const canvasResult = await loadCanvasSnapshot()
         const effectivePreserve =
           preserveLocalChanges || (preFetchStore && storeChangedSinceSnapshot(editor, preFetchStore))
         const { changedRecords, skippedRecords: nextSkippedRecords } = applyRemoteCanvasSnapshot(
           editor,
-          canvasData.snapshot,
+          canvasResult.snapshot,
           {
             preserveLocalChanges: effectivePreserve
           }
@@ -1214,13 +1207,10 @@ export default function App() {
     })
 
     let canvasEvents = null
-    if ('EventSource' in window) {
-      canvasEvents = new EventSource(CANVAS_EVENTS_ENDPOINT)
-      canvasEvents.addEventListener('canvas-changed', loadRemoteCanvasSnapshot)
-      canvasEvents.onerror = (error) => {
-        console.warn('Cowart canvas live refresh disconnected.', error)
-      }
-    }
+    const unsubscribeCanvasEvents = subscribeCanvasChanges(() => {
+      loadRemoteCanvasSnapshot()
+    })
+    canvasEvents = { close: unsubscribeCanvasEvents }
 
     const unsubscribeAnnotationEditingToolLock = editor.store.listen(
       ({ changes }) => {
@@ -1297,6 +1287,9 @@ export default function App() {
         delete window.__cowartSelection
         delete window.__cowartViewState
       }
+      if (editorRef.current === editor) {
+        editorRef.current = null
+      }
       document.getElementById(SELECTION_STATE_ELEMENT_ID)?.remove()
       unsubscribe()
       unsubscribeAnnotationEditingToolLock()
@@ -1334,6 +1327,16 @@ export default function App() {
         shapeUtils={cowartShapeUtils}
         tools={[CowartAnnotationTool]}
       />
+      <div className="cowart-ai-launcher">
+        <button type="button" onClick={() => setAiPanelOpen((open) => !open)}>
+          ✨ AI 助手
+        </button>
+        <button type="button" className="cowart-ai-launcher-settings" onClick={() => setSettingsOpen(true)}>
+          ⚙ 设置
+        </button>
+      </div>
+      <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <AIPanel open={aiPanelOpen} onClose={() => setAiPanelOpen(false)} getEditor={getEditor} />
     </main>
   )
 }
