@@ -63,6 +63,8 @@ import {
 import SettingsPanel from './ui/SettingsPanel.jsx'
 import AIPanel from './ui/AIPanel.jsx'
 
+const TLDRAW_LICENSE_KEY = import.meta.env.VITE_TLDRAW_LICENSE_KEY
+
 const SELECTION_STATE_ELEMENT_ID = 'cowart-selection-state'
 const AI_IMAGE_TOOL_ID = 'ai-image'
 const AI_IMAGE_HOLDER_LABEL = 'AI 图片'
@@ -1319,6 +1321,7 @@ export default function App() {
     <main className="cowart-canvas" aria-label="Cowart infinite canvas">
       <SkippedRecordsNotice records={skippedRecords} />
       <Tldraw
+        licenseKey={TLDRAW_LICENSE_KEY}
         snapshot={snapshot ?? undefined}
         inferDarkMode
         onMount={handleMount}
